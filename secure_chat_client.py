@@ -133,7 +133,6 @@ class SecureChatClient:
             url=f"{self.SERVER_URL}chat/receive/",
             headers={"Authorization": f"Bearer {self.token}"}
         )
-        print(resp)
         if resp.status_code != 200:
             raise Exception(f"failed to fetch messages: {resp.text}")
 
@@ -143,7 +142,6 @@ class SecureChatClient:
 
     def _decrypt_secure_messages(self, messages):
         decrypted_messages=[]
-        print(messages)
         for message in messages:
             their_verify_key = self.get_verify_key(message['sender'])
 

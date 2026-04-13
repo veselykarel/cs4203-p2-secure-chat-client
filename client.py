@@ -41,11 +41,12 @@ def send():
 
 def receive():
     messages = client.receive_secure_messages()
-    print(messages)
     if len(messages) > 0:
         messages.sort(key = lambda x: (x["sender"], x["timestamp"]), reverse=(False, True))
         for m in messages:
-            print(f"{m.sender} says: {m.message}\t({m.timestamp})")
+            print(f"{m['sender']} says: {m['message']}\t({m['timestamp']})")
+    else:
+        print("No messages!")
 
 commands = {
     "login": login,
@@ -67,7 +68,9 @@ if __name__ == "__main__":
         }
 
         options = after_login_options if is_logged_in else before_login_options
+        msg = f"Hi {current_user}" if is_logged_in else ""
         cmd_options = [(c, c.title()) for c in options.keys()]
-        cmd = choice(message=f"Hi {current_user}: ", options=cmd_options)
+        cmd = choice(message=msg, options=cmd_options)
         if cmd_func := commands.get(cmd):
             cmd_func()
+            print("")
