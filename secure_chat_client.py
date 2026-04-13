@@ -1,9 +1,12 @@
 import base64
+
+import nacl.hash
 import requests
 from nacl.public import PrivateKey, PublicKey, Box
 from nacl.secret import SecretBox
 from nacl.pwhash import argon2id, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE
 from nacl.utils import random
+from nacl.encoding import Base64Encoder, RawEncoder
 import os
 from datetime import datetime
 
@@ -107,6 +110,12 @@ class SecureChatClient:
         except Exception as e:
             raise e
 
+        # confirm the recipient public key does not conflict
+        fingerprint = get_fingerprint(recipient_public_key.encode())
+
+        # print("recipient key fingerprint: ", fingerprint)
+        # input("confirm->")
+
         box = Box(message_encryption_key, recipient_public_key)
 
         # sign the message first
@@ -125,7 +134,7 @@ class SecureChatClient:
         # print(resp.status_code, resp.json())
         if resp.status_code != 200:
             raise Exception("failed to send message")
-        print("message sent to server")
+        print(f"sent message to {recipient_username} ({fingerprint})")
 
     def receive_secure_messages(self):
 
@@ -144,7 +153,8 @@ class SecureChatClient:
         decrypted_messages=[]
         for message in messages:
             their_verify_key = self.get_verify_key(message['sender'])
-
+            their_public_key = self.get_public_key(message['sender'])
+            fingerprint = get_fingerprint(their_public_key.encode())
             box = Box(self.private_key, PublicKey(base64.b64decode(message['ephemeral_pub'])))
 
             decoded_ciphertext = base64.b64decode(message['ciphertext'])
@@ -154,6 +164,7 @@ class SecureChatClient:
                 {
                     "timestamp": message["timestamp"],
                     "sender": message["sender"],
+                    "sender_fingerprint": fingerprint,
                     "message": verified_message
                 }
             )
@@ -208,3 +219,8 @@ def decrypt_with_password(data: bytes, password: str):
     )
     box = SecretBox(key)
     return box.decrypt(ciphertext)
+
+def get_fingerprint(key_bytes: bytes):
+    hash_bytes = nacl.hash.sha256(key_bytes, RawEncoder)[:16]
+    hash_b64 = Base64Encoder.encode(hash_bytes)
+    return hash_b64.decode('utf-8').rstrip("=")

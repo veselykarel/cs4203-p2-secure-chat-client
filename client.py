@@ -2,6 +2,7 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.shortcuts import prompt, choice
 from secure_chat_client import SecureChatClient
 import os
+import datetime as dt
 
 # instance of the secure chat client
 url = os.getenv("SERVER_URL", "http://localhost:25780/")
@@ -45,8 +46,11 @@ def receive():
     messages = client.receive_secure_messages()
     if len(messages) > 0:
         messages.sort(key = lambda x: (x["sender"], x["timestamp"]), reverse=(False, True))
+
         for m in messages:
-            print(f"{m['sender']} says: {m['message']}\t({m['timestamp']})")
+            ts_date,ts_time = m['timestamp'].split("T")
+            ts_time=ts_time[:8]
+            print(f"{m['sender']} ({m["sender_fingerprint"]}): {m['message']}\t({ts_date} {ts_time})")
     else:
         print("No messages!")
 
