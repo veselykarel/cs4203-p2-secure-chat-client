@@ -35,7 +35,7 @@ class SecureChatClient:
             raise Exception(f"failed to login: {resp.text}")
 
         self.token = resp.json()['token']
-        print(self.token)
+        # print(self.token)
 
         # read encryption keys from file
         if self.signing_key is None or self.private_key is None:
