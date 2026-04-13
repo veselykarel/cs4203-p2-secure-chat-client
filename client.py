@@ -3,7 +3,7 @@ from prompt_toolkit.shortcuts import prompt, choice
 from secure_chat_client import SecureChatClient
 
 # instance of the secure chat client
-client = SecureChatClient()
+client = SecureChatClient(url="http://localhost:25780/")
 
 # keep track of the logged-in user
 is_logged_in = False
