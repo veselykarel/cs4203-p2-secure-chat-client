@@ -1,9 +1,11 @@
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.shortcuts import prompt, choice
 from secure_chat_client import SecureChatClient
+import os
 
 # instance of the secure chat client
-client = SecureChatClient(url="http://localhost:25780/")
+url = os.getenv("SERVER_URL", "http://localhost:25780/")
+client = SecureChatClient(url)
 
 # keep track of the logged-in user
 is_logged_in = False
